@@ -1,0 +1,36 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "pNotepad",
+  "outputfilename": "pNotepad",
+  "frontend:install": "npm install",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "Jonathan Hecl",
+    "email": "jonathanhecl@gmail.com"
+  },
+  "info": {
+    "productVersion": "1.0.0",
+    "productName": "pNotepad",
+    "copyright": "Copyright © 2024 Jonathan Hecl",
+    "comments": "Secure Text Editor"
+  },
+  "mac": {
+    "documentTypes": [{
+      "name": "Secure Text",
+      "extensions": ["stxt"],
+      "role": "Editor",
+      "icon": "assets/icon.png"
+    }]
+  },
+  "windows": {
+    "icon": "assets/icon.png",
+    "fileAssociations": [{
+      "ext": ".stxt",
+      "name": "Secure Text File",
+      "description": "Secure Text Document",
+      "icon": "assets/icon.png"
+    }]
+  }
+}
