@@ -4,6 +4,7 @@ A private NotePad multiplatform. You can use it to write notes, save them and en
 
 It uses the Wails framework and Go language.
 
+![screenshot](https://raw.githubusercontent.com/jonathanhecl/pNotepad/main/pNotepad.png)
 
 ## Installation
 
