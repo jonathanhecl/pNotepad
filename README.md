@@ -8,6 +8,8 @@ It uses the Wails framework and Go language.
 
 ![screenshot](https://raw.githubusercontent.com/jonathanhecl/pNotepad/main/pNotepad.png)
 
+### Saved in file
+![screenshot](https://raw.githubusercontent.com/jonathanhecl/pNotepad/main/pNotepad-saved.png)
 
 ## Installation
 
