@@ -1,32 +1,56 @@
 # pNotepad
 
-A private NotePad multiplatform. You can use it to write notes, save them and encrypt them easily.
+A secure, cross-platform notepad application for creating and managing encrypted notes. Built with Go and Wails framework, pNotepad provides a simple yet powerful interface for users who value privacy and security in their note-taking process.
 
-It uses the Wails framework and Go language.
+## 🚀 Features
 
-## Screenshots
+- **Secure Text Encryption**: Your notes are protected using robust encryption algorithms
+- **Cross-Platform Support**: Works on Windows, macOS, and Linux
+- **User-Friendly Interface**: Clean and intuitive design for a seamless note-taking experience
+- **File-Based Storage**: Save your notes locally with `.stxt` extension
+- **Lightweight & Fast**: Built with performance in mind using Go
+- **Open Source**: Transparent and community-driven development
 
-![screenshot](https://raw.githubusercontent.com/jonathanhecl/pNotepad/main/pNotepad.png)
+## 📸 Screenshots
 
-### Saved in file
-![screenshot](https://raw.githubusercontent.com/jonathanhecl/pNotepad/main/pNotepad-saved.png)
+### Main Interface
+![Main Interface](https://raw.githubusercontent.com/jonathanhecl/pNotepad/main/pNotepad.png)
 
-## Installation
+### Saved File View
+![Saved File](https://raw.githubusercontent.com/jonathanhecl/pNotepad/main/pNotepad-saved.png)
 
-Download the latest release from the [releases page](https://github.com/jonathanhecl/pNotepad/releases).
+## 🚀 Quick Start
 
-## How to use
+1. Download the latest release from our [releases page](https://github.com/jonathanhecl/pNotepad/releases)
+2. Install the application for your platform
+3. Launch pNotepad with a file:
+   ```
+   pNotepad filename.stxt
+   ```
 
-> pNotepad filename.stxt
+## 🛠️ Development
 
-## Features
+### Prerequisites
+- Go 1.22+
+- Wails framework
+- Node.js and npm (for frontend development)
 
-- Secure text editor
-- Cross platform
-- Easy to use
+### Development Commands
 
-# Compilation
+```bash
+# Run in development mode
+wails dev
 
-To run in live development mode, run `wails dev` in the project directory.
+# Build production package
+wails build
+```
 
-To build a redistributable, production mode package, use `wails build`.
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to submit issues and pull requests.
+
+## 🔗 Links
+
+- [GitHub Repository](https://github.com/jonathanhecl/pNotepad)
+- [Report Issues](https://github.com/jonathanhecl/pNotepad/issues)
+- [Releases](https://github.com/jonathanhecl/pNotepad/releases)
