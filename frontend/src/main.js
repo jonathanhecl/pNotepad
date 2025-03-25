@@ -4,10 +4,13 @@ import './app.css';
 // import logo from './assets/images/logo-universal.png';
 import {UnlockFile, SaveFile, GetVersion} from '../wailsjs/go/main/App';
 
+// Variables globales
+let unlockBlock, editorBlock, statusElement, resultElement, passwordElement;
+
 window.save = function(content) {
     try {
         let text = document.getElementById("editor").innerHTML;
-        let password = document.getElementById("password").value;
+        let password = passwordElement.value;
         SaveFile(text, password).then((result) => {
             if (result) {
                 statusElement.innerText = result;
@@ -29,7 +32,7 @@ window.unlock = function () {
                 if (result.substring(0,1)==";") {
                     statusElement.innerText = "File loaded.";
                     unlockBlock.style.display = "none";
-                    editorBlock.style.display = "block";
+                    editorBlock.style.display = "flex";
                     document.getElementById("editor").innerHTML = result.substring(1);
                     document.getElementById("editor").focus();
                 } else {
@@ -43,7 +46,6 @@ window.unlock = function () {
         console.error(err);
     }
 };
-
 
 // editor
 window.formatTextInRealTime = function () {
@@ -68,58 +70,53 @@ window.alignText = function (alignment) {
     range.insertNode(p);
 }
 
-// MAIN
-
-
 document.querySelector('#app').innerHTML = `
-    <div class="flex-1 overflow-y-auto" style="height: 90vh;">
-        <div class="container mx-auto p-4 pt-6 md:p-6 lg:p-12 xl:p-24" id="unlockBlock">
-            <div class="result" id="result">Please enter your password below 👇</div>
-            <div class="input-box" id="input">
-                <input class="input" id="password" type="password" autocomplete="off" />
-                <button class="btn" onclick="unlock()">Unlock</button>
+    <div class="flex flex-col h-screen">
+        <div class="flex-grow flex items-center justify-center" id="unlockBlock">
+            <div class="unlock-container">
+                <h1 class="unlock-title">pNotepad2</h1>
+                <div class="result" id="result">Please enter your password</div>
+                <form class="input-box" id="unlockForm" onsubmit="event.preventDefault(); unlock();">
+                    <input class="input" id="password" type="password" autocomplete="off" placeholder="Enter password..." />
+                    <button type="submit" class="btn">Unlock</button>
+                </form>
             </div>
         </div>
-        <div class="container mx-auto p-4 pt-6 md:p-6 lg:p-12 xl:p-24" id="editorBlock">
-            <div id="editor" contenteditable="true" oninput="formatTextInRealTime()"></div>
-            <div class="flex flex-row">
-                <div class="flex editor-buttons">
+        <div class="flex flex-col h-screen" id="editorBlock" style="display: none;">
+            <div class="editor-toolbar">
+                <div class="editor-buttons">
                     <button class="editor-button" onclick="formatText('bold')"><i class="fas fa-bold"></i></button>
                     <button class="editor-button" onclick="formatText('italic')"><i class="fas fa-italic"></i></button>
                     <button class="editor-button" onclick="alignText('align-left')"><i class="fas fa-align-left"></i></button>
                     <button class="editor-button" onclick="alignText('align-center')"><i class="fas fa-align-center"></i></button>
                     <button class="editor-button" onclick="alignText('align-right')"><i class="fas fa-align-right"></i></button>
-                </div>
-                <div class="flex flex-1">
-                    <button class="btn flex-1" onclick="save()">Save</button>
+                    <button class="editor-button" onclick="save()">Save</button>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="bg-gray-800 p-4 flex justify-between items-center border-t border-gray-700">
-        <div class="flex items-center">
-            <span class="text-lg mr-4" id="version"></span>
-        </div>
-        <div class="flex items-center">
-            <span class="text-lg mr-4" id="status">Unlock</span>
+            <div id="editor" contenteditable="true" oninput="formatTextInRealTime()"></div>
+            <div class="status-bar">
+                <span id="version"></span>
+                <span id="status"></span>
+            </div>
         </div>
     </div>
 `;
 
-// Blocks
-let unlockBlock = document.getElementById("unlockBlock");
-let editorBlock = document.getElementById("editorBlock");
-// Status
-let statusElement = document.getElementById("status");
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar variables globales
+    unlockBlock = document.getElementById("unlockBlock");
+    editorBlock = document.getElementById("editorBlock");
+    statusElement = document.getElementById("status");
+    resultElement = document.getElementById("result");
+    passwordElement = document.getElementById("password");
+    
+    // Set focus after a small delay to ensure the element is ready
+    setTimeout(() => {
+        passwordElement.focus();
+    }, 100);
 
-let resultElement = document.getElementById("result");
-let passwordElement = document.getElementById("password");
-passwordElement.focus();
-
-// editorBlock
-editorBlock.style.display = "none";
-
-// Load version
-GetVersion().then((version) => {
-    document.getElementById("version").innerHTML = `v${version}`;
+    // Load version
+    GetVersion().then((version) => {
+        document.getElementById("version").innerHTML = `v${version}`;
+    });
 });
