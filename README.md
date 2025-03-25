@@ -45,6 +45,13 @@ wails dev
 wails build
 ```
 
+## 🔒 Security
+
+pNotepad uses state-of-the-art encryption to protect your notes:
+
+- **AES-256-GCM**: Advanced Encryption Standard in Galois/Counter Mode for secure encryption
+- **PBKDF2**: Password-Based Key Derivation Function 2 with SHA-256 for key generation
+
 ## 🤝 Contributing
 
 Contributions are welcome! Feel free to submit issues and pull requests.
