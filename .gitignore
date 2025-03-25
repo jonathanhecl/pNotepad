@@ -25,5 +25,5 @@ go.work.sum
 .env
 
 # Wails assets
-frontend/dist
+frontend/dist/assets
 frontend/node_modules
