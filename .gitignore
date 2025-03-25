@@ -24,4 +24,6 @@ go.work.sum
 # env file
 .env
 
-./build/
+# Wails assets
+frontend/dist
+frontend/node_modules
