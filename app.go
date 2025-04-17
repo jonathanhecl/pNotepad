@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 )
 
@@ -79,8 +78,7 @@ func (a *App) TryLoad() (string, error) {
 	if _, err := os.Stat(a.Filename); os.IsNotExist(err) {
 		file, err := os.Create(a.Filename)
 		if err != nil {
-			log.Fatalf("Failed to create file: %v", err)
-			return "", err
+			return "", fmt.Errorf("failed to create file: %v", err)
 		}
 		file.Close()
 
@@ -94,12 +92,13 @@ func (a *App) TryLoad() (string, error) {
 		return "", err
 	}
 
-	if bytes.Equal(data[:5], headerEncrypted) {
+	// Only attempt decryption if header prefix present
+	if len(data) >= len(headerEncrypted) && bytes.Equal(data[:len(headerEncrypted)], headerEncrypted) {
 		if a.Password == "" {
 			return "", errors.New("Invalid password")
 		}
 
-		data = data[5:]
+		data = data[len(headerEncrypted):]
 
 		decrypted, err := decrypt(data, a.Password)
 		if err != nil {

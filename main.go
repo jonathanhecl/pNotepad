@@ -4,6 +4,7 @@ import (
 	"embed"
 	"flag"
 	"os"
+	"path/filepath"
 	"runtime"
 
 	"github.com/wailsapp/wails/v2"
@@ -17,12 +18,18 @@ import (
 var assets embed.FS
 
 var (
-	version  string = "1.0.2"
+	version  string = "1.0.3"
 	filename string
 )
 
 func main() {
-	flag.StringVar(&filename, "file", "notes.stxt", "Path to the notes file")
+	// Default notes file in user's home directory
+	home, err := os.UserHomeDir()
+	if err != nil {
+		home = "."
+	}
+	defaultPath := filepath.Join(home, "notes.stxt")
+	flag.StringVar(&filename, "file", defaultPath, "Path to the notes file")
 	flag.Parse()
 
 	// Check command line arguments for file path in Windows
@@ -37,7 +44,7 @@ func main() {
 	app.Version = version
 
 	// Create application with options
-	err := wails.Run(&options.App{
+	err = wails.Run(&options.App{
 		Title:  "pNotepad (" + filename + ")",
 		Width:  1024,
 		Height: 768,

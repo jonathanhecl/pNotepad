@@ -146,3 +146,43 @@
 #editor .align-right {
     text-align: right;
 }
+
+/* Search bar container */
+.editor-search {
+    border-bottom: 1px solid #555;
+}
+
+/* Search input field */
+.search-input {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+/* Search buttons */
+.search-button {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.search-button:hover {
+    background-color: #3d3d3d;
+}
+
+/* Highlighted search matches */
+mark.search-highlight {
+    background-color: yellow;
+    color: black;
+}
+
+/* Current match */
+mark.search-highlight.current {
+    background-color: orange;
+    color: black;
+}
