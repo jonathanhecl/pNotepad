@@ -7,6 +7,7 @@ import {UnlockFile, SaveFile, GetVersion} from '../wailsjs/go/main/App';
 // Variables globales
 let unlockBlock, editorBlock, statusElement, resultElement, passwordElement;
 let matches = [], currentMatch = -1;
+let savedSelection = null;
 
 window.save = function(content) {
     try {
@@ -95,7 +96,7 @@ document.querySelector('#app').innerHTML = `
                     <button class="editor-button" onclick="save()">Save</button>
                 </div>
             </div>
-            <div id="editor" contenteditable="true" oninput="formatTextInRealTime()"></div>
+            <div id="editor" contenteditable="true" spellcheck="false" oninput="formatTextInRealTime()" oncontextmenu="return true;"></div>
             <div class="status-bar">
                 <span id="version"></span>
                 <span id="status"></span>
@@ -141,8 +142,41 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('searchInput').addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
-            window.findText();
+            // If there are already matches, go to next; otherwise, search
+            if (matches.length > 0) {
+                window.nextMatch();
+            } else {
+                window.findText();
+            }
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            window.closeSearchPopup();
         }
+    });
+
+    // Global keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // F3 to open search
+        if (e.key === 'F3') {
+            e.preventDefault();
+            window.openSearchPopup();
+        }
+    });
+
+    // Editor-specific paste handling
+    const editor = document.getElementById('editor');
+    
+    editor.addEventListener('paste', function(e) {
+        e.preventDefault();
+        
+        // Get plain text from clipboard
+        const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+        
+        // Use execCommand to insert text so it's added to undo history
+        document.execCommand('insertText', false, text);
+        
+        // Trigger the input event to mark as unsaved
+        formatTextInRealTime();
     });
 
     // Close popup on outside click
@@ -198,17 +232,138 @@ window.nextMatch = function() {
 window.openSearchPopup = function() {
     const popup = document.getElementById('searchPopup');
     popup.classList.remove('hidden');
-    document.getElementById('searchInput').focus();
-};
-
-window.closeSearchPopup = function() {
-    // Clear highlights
+    // Save current cursor position/selection
     const editor = document.getElementById('editor');
-    editor.innerHTML = editor.innerHTML.replace(/<mark class=\"search-highlight(?: current)?\">([^<]*)<\/mark>/g, '$1');
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+        savedSelection = selection.getRangeAt(0).cloneRange();
+    }
+    // Clear previous search
+    const searchInput = document.getElementById('searchInput');
+    searchInput.value = '';
+    // Clear highlights
+    editor.innerHTML = editor.innerHTML.replace(/<mark class="search-highlight(?: current)?">([^<]*)<\/mark>/g, '$1');
     matches = [];
     currentMatch = -1;
     // Clear match count
     document.getElementById('matchCount').innerText = '';
+    searchInput.focus();
+};
+
+window.closeSearchPopup = function() {
+    const editor = document.getElementById('editor');
+    
+    // Calculate text position before clearing highlights
+    let textOffset = null;
+    
+    // Priority 1: If there's a current match, use that position
+    if (currentMatch >= 0 && matches.length > 0) {
+        const currentElement = matches[currentMatch];
+        
+        // Walk through all text nodes to find the position
+        let offset = 0;
+        let foundMatch = false;
+        
+        function walkNodes(node) {
+            if (foundMatch) return;
+            
+            if (node.nodeType === Node.TEXT_NODE) {
+                offset += node.length;
+            } else if (node === currentElement) {
+                // Found the match element, add its text length
+                offset += currentElement.textContent.length;
+                foundMatch = true;
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+                for (let child of node.childNodes) {
+                    walkNodes(child);
+                    if (foundMatch) break;
+                }
+            }
+        }
+        
+        walkNodes(editor);
+        
+        if (foundMatch) {
+            textOffset = offset;
+        }
+    }
+    // Priority 2: If no match but there's a saved selection, calculate its offset
+    else if (savedSelection) {
+        try {
+            const range = document.createRange();
+            range.setStart(editor, 0);
+            range.setEnd(savedSelection.startContainer, savedSelection.startOffset);
+            textOffset = range.toString().length;
+        } catch (e) {
+            console.log('Could not calculate saved selection offset');
+        }
+    }
+    
+    // Clear highlights
+    editor.innerHTML = editor.innerHTML.replace(/<mark class="search-highlight(?: current)?">([^<]*)<\/mark>/g, '$1');
+    matches = [];
+    currentMatch = -1;
+    
+    // Clear match count
+    document.getElementById('matchCount').innerText = '';
+    
     // Hide popup
     document.getElementById('searchPopup').classList.add('hidden');
+    
+    // Return focus to editor
+    editor.focus();
+    
+    // Restore cursor position at the calculated offset
+    if (textOffset !== null) {
+        try {
+            const selection = window.getSelection();
+            const range = document.createRange();
+            let currentOffset = 0;
+            let targetNode = null;
+            let targetOffset = 0;
+            
+            function findPosition(node) {
+                if (targetNode) return;
+                
+                if (node.nodeType === Node.TEXT_NODE) {
+                    if (currentOffset + node.length >= textOffset) {
+                        targetNode = node;
+                        targetOffset = textOffset - currentOffset;
+                    } else {
+                        currentOffset += node.length;
+                    }
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    for (let child of node.childNodes) {
+                        findPosition(child);
+                        if (targetNode) break;
+                    }
+                }
+            }
+            
+            findPosition(editor);
+            
+            if (targetNode) {
+                range.setStart(targetNode, targetOffset);
+                range.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(range);
+                
+                // Scroll to cursor position
+                const tempSpan = document.createElement('span');
+                range.insertNode(tempSpan);
+                tempSpan.scrollIntoView({ behavior: 'auto', block: 'center' });
+                tempSpan.remove();
+                
+                // Re-set the selection after removing the temp span
+                range.setStart(targetNode, targetOffset);
+                range.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        } catch (e) {
+            console.log('Could not restore cursor position:', e);
+        }
+    }
+    
+    savedSelection = null;
 };
